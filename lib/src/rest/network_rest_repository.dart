@@ -13,6 +13,7 @@ const int receiveTimeout = 45;
 const int connectTimeout = 35;
 
 class NetworkRestRepository implements NetworkRestInterface {
+  String baseUrl;
   Map<String, String>? headers;
 
   final String? headerToken;
@@ -20,6 +21,7 @@ class NetworkRestRepository implements NetworkRestInterface {
   final RefreshTokenInterface? refreshTokenInterface;
 
   NetworkRestRepository({
+    this.baseUrl = '',
     this.headers,
     this.headerToken,
     this.tokenInterface,
@@ -34,6 +36,7 @@ class NetworkRestRepository implements NetworkRestInterface {
   Future<Dio> _instanceDio() async {
     final dio = Dio(
       BaseOptions(
+        baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: connectTimeout).inMilliseconds,
         receiveTimeout: const Duration(seconds: receiveTimeout).inMilliseconds,
         contentType: 'application/json',
@@ -260,33 +263,48 @@ class NetworkRestRepository implements NetworkRestInterface {
 
     var statusCode = error.response!.statusCode;
 
-    if (error.response?.data['code'] != null) {
-      statusCode = error.response?.data['code'];
+    var body = error.response?.data;
+
+    if (body == null) {
+      throw ExceptionBuilder.builderByStatus(
+        statusCode ?? 0,
+        message: 'body is null',
+      );
+    }
+
+    if (body.toString().contains('<html>')) {
+      throw ExceptionBuilder.builderByStatus(
+        statusCode ?? 0,
+        message: body,
+      );
+    }
+
+    if (body['code'] != null) {
+      statusCode = body['code'];
     }
 
     String? errorType;
     String? messageError;
 
-    if (error.response!.data != null) {
-      try {
-        dynamic json = error.response!.data;
-        errorType = json['type'];
-        switch (json['error'].runtimeType.toString()) {
-          case 'String':
-            messageError = json['error'];
-            break;
-          case '_InternalLinkedHashMap<String, dynamic>':
-            messageError = json['error']['message'];
-            break;
-          case 'List':
-            break;
-          default:
-        }
-      } catch (error) {
-        throw BaseNetworkException(
-          message: 'Ops! Não foi possível obter resposta do servidor.',
-        );
+    try {
+      dynamic json = error.response!.data;
+      errorType = json['type'];
+      switch (json['error'].runtimeType.toString()) {
+        case 'String':
+          messageError = json['error'];
+          break;
+        case '_InternalLinkedHashMap<String, dynamic>':
+          messageError = json['error']['message'];
+          break;
+        case 'List':
+          break;
+        default:
       }
+    } catch (error) {
+      throw BaseNetworkException(
+        code: statusCode ?? 0,
+        message: 'Ops! Não foi possível obter resposta do servidor.',
+      );
     }
 
     if (errorType != null) {
