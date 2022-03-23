@@ -2,9 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:graphql/client.dart';
 import 'package:network_base/network_base.dart';
 import 'package:network_base/src/exceptions/exception_builder.dart';
-import 'package:network_base/src/token/token_interface.dart';
-
-import 'network_graphql_interface.dart';
 
 class NetworkGraphQlRepository implements NetworkGrapqhQlInterface {
   final String baseUrl;

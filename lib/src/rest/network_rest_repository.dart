@@ -34,13 +34,18 @@ class NetworkRestRepository implements NetworkRestInterface {
   }
 
   Future<Dio> _instanceDio() async {
+    var token = await tokenInterface?.getToken();
+    Map<String, String> tempHeaders = Map.from(headers!);
+    if (token != null) {
+      tempHeaders.addAll({headerToken!: token});
+    }
     final dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: connectTimeout).inMilliseconds,
         receiveTimeout: const Duration(seconds: receiveTimeout).inMilliseconds,
         contentType: 'application/json',
-        headers: headers,
+        headers: tempHeaders,
       ),
     );
     dio.interceptors.add(
@@ -85,17 +90,6 @@ class NetworkRestRepository implements NetworkRestInterface {
         },
       ),
     );
-    var token = await tokenInterface?.getToken();
-    if (token != null) {
-      dio.interceptors.add(
-        InterceptorsWrapper(
-          onRequest: (options, handler) {
-            options.headers[headerToken!] = token;
-            return handler.next(options);
-          },
-        ),
-      );
-    }
     return dio;
   }
 
