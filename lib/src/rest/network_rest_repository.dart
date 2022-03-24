@@ -19,6 +19,7 @@ class NetworkRestRepository implements NetworkRestInterface {
   final String? headerToken;
   final TokenInterface? tokenInterface;
   final RefreshTokenInterface? refreshTokenInterface;
+  final bool showResponseData;
 
   NetworkRestRepository({
     this.baseUrl = '',
@@ -26,6 +27,7 @@ class NetworkRestRepository implements NetworkRestInterface {
     this.headerToken,
     this.tokenInterface,
     this.refreshTokenInterface,
+    this.showResponseData = true,
   }) {
     if (tokenInterface != null) {
       assert(headerToken != null);
@@ -53,7 +55,7 @@ class NetworkRestRepository implements NetworkRestInterface {
         onRequest: (options, handler) {
           if (kDebugMode) {
             debugPrint('-------------------------------------------');
-            debugPrint('onRequest => ${options.path}');
+            debugPrint('onRequest => [${options.method}] ${options.uri}');
             if (options.data != null) {
               debugPrint('DATA => ${options.data}');
             }
@@ -67,13 +69,16 @@ class NetworkRestRepository implements NetworkRestInterface {
         onResponse: (response, handler) {
           if (kDebugMode) {
             debugPrint('-------------------------------------------');
-            debugPrint('onResponse => ${response.requestOptions.path}');
+            debugPrint(
+                'onResponse => [${response.requestOptions.method}] ${response.requestOptions.uri}');
             debugPrint('STATUS CODE => ${response.statusCode}');
-            debugPrint('DATA =>');
-            final pattern = RegExp('.{1,800}');
-            pattern
-                .allMatches(prettyJson(response.data, indent: 2))
-                .forEach((match) => debugPrint(match.group(0)));
+            if (showResponseData) {
+              debugPrint('DATA =>');
+              final pattern = RegExp('.{1,800}');
+              pattern
+                  .allMatches(prettyJson(response.data, indent: 2))
+                  .forEach((match) => debugPrint(match.group(0)));
+            }
             debugPrint('-------------------------------------------');
           }
           return handler.next(response);
@@ -81,7 +86,8 @@ class NetworkRestRepository implements NetworkRestInterface {
         onError: (DioError error, handler) {
           if (kDebugMode) {
             debugPrint('-------------------------------------------');
-            debugPrint('onError => ${error.requestOptions.path}');
+            debugPrint(
+                'onError => [${error.requestOptions.method}] ${error.requestOptions.uri}');
             debugPrint('STATUS CODE => ${error.response?.statusCode}');
             debugPrint('ERROR => ${error.response}');
             debugPrint('-------------------------------------------');
@@ -104,19 +110,22 @@ class NetworkRestRepository implements NetworkRestInterface {
     Map<String, dynamic> headers = const {},
     Map<String, dynamic>? queryParameters,
     String? contentType,
+    int? timeoutSeconds,
   }) async {
     final dio = await _instanceDio();
+    dio.options.headers.addAll(headers);
+
+    if (contentType != null) {
+      dio.options.contentType = contentType;
+    }
+    if (timeoutSeconds != null) {
+      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.connectTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.sendTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+    }
+
     try {
-      final response = await dio.get(
-        url,
-        queryParameters: queryParameters,
-        options: contentType == null
-            ? null
-            : Options(
-                contentType: contentType,
-              ),
-      )
-        ..requestOptions.headers.addAll(headers);
+      final response = await dio.get(url, queryParameters: queryParameters);
       return response;
     } on DioError catch (error) {
       if (error.response?.statusCode == 401) {
@@ -142,18 +151,21 @@ class NetworkRestRepository implements NetworkRestInterface {
     String? contentType,
   }) async {
     final dio = await _instanceDio();
+    dio.options.headers.addAll(headers);
+
+    if (contentType != null) {
+      dio.options.contentType = contentType;
+    }
+    // if (timeoutSeconds != null) {
+    //   dio.options.sendTimeout = timeoutSeconds;
+    // }
+
     try {
       final response = await dio.post(
         url,
         data: data,
         queryParameters: queryParameters,
-        options: contentType == null
-            ? null
-            : Options(
-                contentType: contentType,
-              ),
-      )
-        ..requestOptions.headers.addAll(headers);
+      );
       return response;
     } on DioError catch (error) {
       if (error.response?.statusCode == 401) {
@@ -179,18 +191,21 @@ class NetworkRestRepository implements NetworkRestInterface {
     String? contentType,
   }) async {
     final dio = await _instanceDio();
+    dio.options.headers.addAll(headers);
+
+    if (contentType != null) {
+      dio.options.contentType = contentType;
+    }
+    // if (timeoutSeconds != null) {
+    //   dio.options.sendTimeout = timeoutSeconds;
+    // }
+
     try {
       final response = await dio.put(
         url,
         data: data,
         queryParameters: queryParameters,
-        options: contentType == null
-            ? null
-            : Options(
-                contentType: contentType,
-              ),
-      )
-        ..requestOptions.headers.addAll(headers);
+      );
       return response;
     } on DioError catch (error) {
       if (error.response?.statusCode == 401) {
@@ -216,18 +231,21 @@ class NetworkRestRepository implements NetworkRestInterface {
     String? contentType,
   }) async {
     final dio = await _instanceDio();
+    dio.options.headers.addAll(headers);
+
+    if (contentType != null) {
+      dio.options.contentType = contentType;
+    }
+    // if (timeoutSeconds != null) {
+    //   dio.options.sendTimeout = timeoutSeconds;
+    // }
+
     try {
       final response = await dio.delete(
         url,
         data: data,
         queryParameters: queryParameters,
-        options: contentType == null
-            ? null
-            : Options(
-                contentType: contentType,
-              ),
-      )
-        ..requestOptions.headers.addAll(headers);
+      );
       return response;
     } on DioError catch (error) {
       if (error.response?.statusCode == 401) {
@@ -251,6 +269,7 @@ class NetworkRestRepository implements NetworkRestInterface {
   ExceptionModel _buildException(DioError error) {
     if (error.response == null) {
       return BaseNetworkException(
+        code: -1,
         message: 'Ops! Verifique sua conexão com a internet.',
       );
     }

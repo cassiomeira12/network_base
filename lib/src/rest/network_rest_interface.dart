@@ -8,6 +8,7 @@ abstract class NetworkRestInterface with RefreshTokenInterface {
     Map<String, dynamic> headers,
     Map<String, dynamic>? queryParameters,
     String? contentType,
+    int? timeoutSeconds,
   });
 
   Future<Response> post(
