@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:network_base/src/exceptions/base_network_exception.dart';
@@ -107,6 +109,7 @@ class NetworkRestRepository implements NetworkRestInterface {
   @override
   Future<Response> get(
     String url, {
+    String? baseUrl,
     Map<String, dynamic> headers = const {},
     Map<String, dynamic>? queryParameters,
     String? contentType,
@@ -118,10 +121,15 @@ class NetworkRestRepository implements NetworkRestInterface {
     if (contentType != null) {
       dio.options.contentType = contentType;
     }
+
     if (timeoutSeconds != null) {
       dio.options.receiveTimeout = Duration(seconds: timeoutSeconds).inSeconds;
       dio.options.connectTimeout = Duration(seconds: timeoutSeconds).inSeconds;
       dio.options.sendTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+    }
+
+    if (baseUrl != null) {
+      dio.options.baseUrl = baseUrl;
     }
 
     try {
@@ -130,7 +138,14 @@ class NetworkRestRepository implements NetworkRestInterface {
     } on DioError catch (error) {
       if (error.response?.statusCode == 401) {
         if (await refreshToken()) {
-          return get(url, queryParameters: queryParameters);
+          return get(
+            url,
+            baseUrl: baseUrl,
+            headers: headers,
+            queryParameters: queryParameters,
+            contentType: contentType,
+            timeoutSeconds: timeoutSeconds,
+          );
         } else {
           throw _buildException(error);
         }
@@ -146,9 +161,11 @@ class NetworkRestRepository implements NetworkRestInterface {
   Future<Response> post(
     String url, {
     data,
+    String? baseUrl,
     Map<String, dynamic> headers = const {},
     Map<String, dynamic>? queryParameters,
     String? contentType,
+    int? timeoutSeconds,
   }) async {
     final dio = await _instanceDio();
     dio.options.headers.addAll(headers);
@@ -156,9 +173,16 @@ class NetworkRestRepository implements NetworkRestInterface {
     if (contentType != null) {
       dio.options.contentType = contentType;
     }
-    // if (timeoutSeconds != null) {
-    //   dio.options.sendTimeout = timeoutSeconds;
-    // }
+
+    if (timeoutSeconds != null) {
+      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.connectTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.sendTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+    }
+
+    if (baseUrl != null) {
+      dio.options.baseUrl = baseUrl;
+    }
 
     try {
       final response = await dio.post(
@@ -170,7 +194,15 @@ class NetworkRestRepository implements NetworkRestInterface {
     } on DioError catch (error) {
       if (error.response?.statusCode == 401) {
         if (await refreshToken()) {
-          return get(url, queryParameters: queryParameters);
+          return post(
+            url,
+            data: data,
+            baseUrl: baseUrl,
+            headers: headers,
+            queryParameters: queryParameters,
+            contentType: contentType,
+            timeoutSeconds: timeoutSeconds,
+          );
         } else {
           throw _buildException(error);
         }
@@ -186,9 +218,11 @@ class NetworkRestRepository implements NetworkRestInterface {
   Future<Response> put(
     String url, {
     data,
+    String? baseUrl,
     Map<String, dynamic> headers = const {},
     Map<String, dynamic>? queryParameters,
     String? contentType,
+    int? timeoutSeconds,
   }) async {
     final dio = await _instanceDio();
     dio.options.headers.addAll(headers);
@@ -196,9 +230,16 @@ class NetworkRestRepository implements NetworkRestInterface {
     if (contentType != null) {
       dio.options.contentType = contentType;
     }
-    // if (timeoutSeconds != null) {
-    //   dio.options.sendTimeout = timeoutSeconds;
-    // }
+
+    if (timeoutSeconds != null) {
+      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.connectTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.sendTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+    }
+
+    if (baseUrl != null) {
+      dio.options.baseUrl = baseUrl;
+    }
 
     try {
       final response = await dio.put(
@@ -210,7 +251,15 @@ class NetworkRestRepository implements NetworkRestInterface {
     } on DioError catch (error) {
       if (error.response?.statusCode == 401) {
         if (await refreshToken()) {
-          return get(url, queryParameters: queryParameters);
+          return put(
+            url,
+            data: data,
+            baseUrl: baseUrl,
+            headers: headers,
+            queryParameters: queryParameters,
+            contentType: contentType,
+            timeoutSeconds: timeoutSeconds,
+          );
         } else {
           throw _buildException(error);
         }
@@ -226,9 +275,11 @@ class NetworkRestRepository implements NetworkRestInterface {
   Future<Response> delete(
     String url, {
     data,
+    String? baseUrl,
     Map<String, dynamic> headers = const {},
     Map<String, dynamic>? queryParameters,
     String? contentType,
+    int? timeoutSeconds,
   }) async {
     final dio = await _instanceDio();
     dio.options.headers.addAll(headers);
@@ -236,9 +287,16 @@ class NetworkRestRepository implements NetworkRestInterface {
     if (contentType != null) {
       dio.options.contentType = contentType;
     }
-    // if (timeoutSeconds != null) {
-    //   dio.options.sendTimeout = timeoutSeconds;
-    // }
+
+    if (timeoutSeconds != null) {
+      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.connectTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.sendTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+    }
+
+    if (baseUrl != null) {
+      dio.options.baseUrl = baseUrl;
+    }
 
     try {
       final response = await dio.delete(
@@ -250,10 +308,78 @@ class NetworkRestRepository implements NetworkRestInterface {
     } on DioError catch (error) {
       if (error.response?.statusCode == 401) {
         if (await refreshToken()) {
-          return get(
+          return delete(
             url,
+            data: data,
+            baseUrl: baseUrl,
+            headers: headers,
             queryParameters: queryParameters,
             contentType: contentType,
+            timeoutSeconds: timeoutSeconds,
+          );
+        } else {
+          throw _buildException(error);
+        }
+      } else {
+        throw _buildException(error);
+      }
+    } catch (error) {
+      throw BaseNetworkException();
+    }
+  }
+
+  @override
+  Future<Response> uploadFile(
+    String url, {
+    required Map<String, File> formData,
+    String? baseUrl,
+    Map<String, dynamic> headers = const {},
+    Map<String, dynamic>? queryParameters,
+    int? timeoutSeconds,
+  }) async {
+    final dio = await _instanceDio();
+    dio.options.headers.addAll(headers);
+
+    if (timeoutSeconds != null) {
+      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.connectTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.sendTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+    }
+
+    if (baseUrl != null) {
+      dio.options.baseUrl = baseUrl;
+    }
+
+    try {
+      final form = <String, MultipartFile>{};
+
+      for (var entry in formData.entries) {
+        final filename = entry.value.path.split('/').last;
+        final file = MultipartFile(
+          entry.value.openRead(),
+          await entry.value.length(),
+          filename: filename,
+        );
+        form[entry.key] = file;
+      }
+
+      final response = await dio.post(
+        url,
+        data: FormData.fromMap(form),
+        options: Options(contentType: 'multipart/form-data'),
+      );
+
+      return response;
+    } on DioError catch (error) {
+      if (error.response?.statusCode == 401) {
+        if (await refreshToken()) {
+          return uploadFile(
+            url,
+            formData: formData,
+            baseUrl: baseUrl,
+            headers: headers,
+            queryParameters: queryParameters,
+            timeoutSeconds: timeoutSeconds,
           );
         } else {
           throw _buildException(error);
