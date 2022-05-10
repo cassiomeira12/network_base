@@ -5,7 +5,7 @@ class AuthenticationException implements ExceptionModel, Exception {
   int code;
 
   @override
-  String message;
+  dynamic message;
 
   AuthenticationException({
     this.code = 0,

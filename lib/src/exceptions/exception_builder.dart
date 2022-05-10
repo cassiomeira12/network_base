@@ -4,29 +4,19 @@ import 'package:network_base/src/exceptions/exception_model.dart';
 class ExceptionBuilder {
   static ExceptionModel builderByStatus(
     int statusCode, {
-    String? message,
+    dynamic message,
   }) {
     switch (statusCode) {
       case 0:
       case 141:
-        throw message == null
-            ? BaseNetworkException(code: statusCode)
-            : BaseNetworkException(
-                code: statusCode,
-                message: message,
-              );
+        throw BaseNetworkException(code: statusCode, message: message);
       case 400:
         throw BaseNetworkException(
           code: statusCode,
           message: message ?? 'Ops! Os dados informados estão incorretos.',
         );
       case 401:
-        throw message == null
-            ? BaseNetworkException(code: statusCode)
-            : BaseNetworkException(
-                code: statusCode,
-                message: message,
-              );
+        throw BaseNetworkException(code: statusCode, message: message);
       case 404:
         throw BaseNetworkException(
           code: statusCode,
@@ -64,9 +54,7 @@ class ExceptionBuilder {
           message: message ?? 'Seu e-mail ainda não foi verificado!',
         );
       default:
-        throw BaseNetworkException(
-          code: statusCode,
-        );
+        throw BaseNetworkException(code: statusCode, message: message);
     }
   }
 }

@@ -5,12 +5,14 @@ class BaseNetworkException implements ExceptionModel, Exception {
   int code;
 
   @override
-  String message;
+  dynamic message;
 
   BaseNetworkException({
     this.code = 0,
-    this.message = 'Ops! ocorreu um erro.',
-  });
+    this.message,
+  }) {
+    message ??= 'Ops! ocorreu um erro.';
+  }
 
   @override
   String toString() {

@@ -1,4 +1,4 @@
 abstract class ExceptionModel implements Exception {
-  abstract String message;
+  abstract dynamic message;
   abstract int code;
 }

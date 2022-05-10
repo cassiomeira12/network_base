@@ -457,7 +457,7 @@ class NetworkRestRepository implements NetworkRestInterface {
 
     throw ExceptionBuilder.builderByStatus(
       statusCode ?? 0,
-      message: messageError,
+      message: error.response?.data ?? messageError,
     );
   }
 }
