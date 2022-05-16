@@ -3,3 +3,5 @@
 /.dart_tool/version
 pubspec.lock
 .packages
+.fvm/flutter_sdk
+.fvm/fvm_config.json

@@ -1,6 +1,6 @@
 name: network_base
 description: A new Flutter package project.
-version: 1.0.5
+version: 1.1.0
 homepage: https://github.com/cassiomeira12/network_base
 
 environment:
@@ -11,13 +11,13 @@ dependencies:
   flutter:
     sdk: flutter
 
-  dio: 4.0.4
-  graphql: 5.0.0
+  dio: 4.0.6
+  graphql: 5.1.1
   pretty_json: 2.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^1.0.4
+  flutter_lints: 2.0.1
 
 flutter:
