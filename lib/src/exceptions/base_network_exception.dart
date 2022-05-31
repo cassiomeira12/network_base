@@ -16,6 +16,6 @@ class BaseNetworkException implements ExceptionModel, Exception {
 
   @override
   String toString() {
-    return message;
+    return message.toString();
   }
 }
