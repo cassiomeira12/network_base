@@ -22,6 +22,7 @@ class NetworkRestRepository implements NetworkRestInterface {
   final TokenInterface? tokenInterface;
   final RefreshTokenInterface? refreshTokenInterface;
   final bool showResponseData;
+  final List<InterceptorsWrapper> interceptors;
 
   NetworkRestRepository({
     this.baseUrl = '',
@@ -30,6 +31,7 @@ class NetworkRestRepository implements NetworkRestInterface {
     this.tokenInterface,
     this.refreshTokenInterface,
     this.showResponseData = true,
+    this.interceptors = const [],
   }) {
     if (tokenInterface != null) {
       assert(headerToken != null);
@@ -52,53 +54,56 @@ class NetworkRestRepository implements NetworkRestInterface {
         headers: tempHeaders,
       ),
     );
-    dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) {
-          if (kDebugMode) {
-            debugPrint('-------------------------------------------');
-            debugPrint('onRequest => [${options.method}] ${options.uri}');
-            if (options.data != null) {
-              debugPrint('DATA => ${options.data}');
-            }
-            if (options.queryParameters.isNotEmpty) {
-              debugPrint('PARAMS => ${options.queryParameters}');
-            }
-            debugPrint('-------------------------------------------');
-          }
-          return handler.next(options);
-        },
-        onResponse: (response, handler) {
-          if (kDebugMode) {
-            debugPrint('-------------------------------------------');
-            debugPrint(
-                'onResponse => [${response.requestOptions.method}] ${response.requestOptions.uri}');
-            debugPrint('STATUS CODE => ${response.statusCode}');
-            if (showResponseData) {
-              debugPrint('DATA =>');
-              final pattern = RegExp('.{1,800}');
-              pattern
-                  .allMatches(prettyJson(response.data, indent: 2))
-                  .forEach((match) => debugPrint(match.group(0)));
-            }
-            debugPrint('-------------------------------------------');
-          }
-          return handler.next(response);
-        },
-        onError: (DioError error, handler) {
-          if (kDebugMode) {
-            debugPrint('-------------------------------------------');
-            debugPrint(
-                'onError => [${error.requestOptions.method}] ${error.requestOptions.uri}');
-            debugPrint('STATUS CODE => ${error.response?.statusCode}');
-            debugPrint('ERROR => ${error.response}');
-            debugPrint('-------------------------------------------');
-          }
-          return handler.next(error);
-        },
-      ),
-    );
+    dio.interceptors.add(_printerInterceptor());
+    dio.interceptors.addAll(interceptors);
     return dio;
+  }
+
+  InterceptorsWrapper _printerInterceptor() {
+    return InterceptorsWrapper(
+      onRequest: (options, handler) {
+        if (kDebugMode) {
+          debugPrint('-------------------------------------------');
+          debugPrint('onRequest => [${options.method}] ${options.uri}');
+          if (options.data != null) {
+            debugPrint('DATA => ${options.data}');
+          }
+          if (options.queryParameters.isNotEmpty) {
+            debugPrint('PARAMS => ${options.queryParameters}');
+          }
+          debugPrint('-------------------------------------------');
+        }
+        return handler.next(options);
+      },
+      onResponse: (response, handler) {
+        if (kDebugMode) {
+          debugPrint('-------------------------------------------');
+          debugPrint(
+              'onResponse => [${response.requestOptions.method}] ${response.requestOptions.uri}');
+          debugPrint('STATUS CODE => ${response.statusCode}');
+          if (showResponseData) {
+            debugPrint('DATA =>');
+            final pattern = RegExp('.{1,800}');
+            pattern
+                .allMatches(prettyJson(response.data, indent: 2))
+                .forEach((match) => debugPrint(match.group(0)));
+          }
+          debugPrint('-------------------------------------------');
+        }
+        return handler.next(response);
+      },
+      onError: (DioError error, handler) {
+        if (kDebugMode) {
+          debugPrint('-------------------------------------------');
+          debugPrint(
+              'onError => [${error.requestOptions.method}] ${error.requestOptions.uri}');
+          debugPrint('STATUS CODE => ${error.response?.statusCode}');
+          debugPrint('ERROR => ${error.response}');
+          debugPrint('-------------------------------------------');
+        }
+        return handler.next(error);
+      },
+    );
   }
 
   @override

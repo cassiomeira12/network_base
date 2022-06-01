@@ -8,3 +8,4 @@ export 'src/rest/network_rest_interface.dart';
 export 'src/rest/network_rest_repository.dart';
 export 'src/token/refresh_token_interface.dart';
 export 'src/token/token_interface.dart';
+export 'package:dio/dio.dart';
