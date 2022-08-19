@@ -29,7 +29,7 @@ class NetworkGraphQlRepository implements NetworkGrapqhQlInterface {
   }) async {
     var token = await tokenInterface?.getToken();
     if (token != null) headers![headerToken!] = token;
-    final _client = GraphQLClient(
+    final client = GraphQLClient(
       cache: GraphQLCache(),
       link: AuthLink(
         getToken: () async => token,
@@ -37,7 +37,7 @@ class NetworkGraphQlRepository implements NetworkGrapqhQlInterface {
         HttpLink(baseUrl, defaultHeaders: headers!),
       ),
     );
-    final result = await _client.mutate(
+    final result = await client.mutate(
       MutationOptions(
         document: gql(stringMutation),
         variables: variables,

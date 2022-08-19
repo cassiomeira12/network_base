@@ -71,7 +71,6 @@ class NetworkRestRepository implements NetworkRestInterface {
           if (options.queryParameters.isNotEmpty) {
             debugPrint('PARAMS => ${options.queryParameters}');
           }
-          debugPrint('-------------------------------------------');
         }
         return handler.next(options);
       },
@@ -88,7 +87,6 @@ class NetworkRestRepository implements NetworkRestInterface {
                 .allMatches(prettyJson(response.data, indent: 2))
                 .forEach((match) => debugPrint(match.group(0)));
           }
-          debugPrint('-------------------------------------------');
         }
         return handler.next(response);
       },
@@ -99,7 +97,6 @@ class NetworkRestRepository implements NetworkRestInterface {
               'onError => [${error.requestOptions.method}] ${error.requestOptions.uri}');
           debugPrint('STATUS CODE => ${error.response?.statusCode}');
           debugPrint('ERROR => ${error.response}');
-          debugPrint('-------------------------------------------');
         }
         return handler.next(error);
       },
