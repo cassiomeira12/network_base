@@ -48,8 +48,8 @@ class NetworkRestRepository implements NetworkRestInterface {
     final dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
-        connectTimeout: const Duration(seconds: connectTimeout).inMilliseconds,
-        receiveTimeout: const Duration(seconds: receiveTimeout).inMilliseconds,
+        connectTimeout: const Duration(seconds: connectTimeout),
+        receiveTimeout: const Duration(seconds: receiveTimeout),
         contentType: 'application/json',
         headers: tempHeaders,
       ),
@@ -90,7 +90,7 @@ class NetworkRestRepository implements NetworkRestInterface {
         }
         return handler.next(response);
       },
-      onError: (DioError error, handler) {
+      onError: (DioException error, handler) {
         if (kDebugMode) {
           debugPrint('-------------------------------------------');
           debugPrint(
@@ -125,9 +125,9 @@ class NetworkRestRepository implements NetworkRestInterface {
     }
 
     if (timeoutSeconds != null) {
-      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds).inSeconds;
-      dio.options.connectTimeout = Duration(seconds: timeoutSeconds).inSeconds;
-      dio.options.sendTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds);
+      dio.options.connectTimeout = Duration(seconds: timeoutSeconds);
+      dio.options.sendTimeout = Duration(seconds: timeoutSeconds);
     }
 
     if (baseUrl != null) {
@@ -137,7 +137,7 @@ class NetworkRestRepository implements NetworkRestInterface {
     try {
       final response = await dio.get(url, queryParameters: queryParameters);
       return response;
-    } on DioError catch (error) {
+    } on DioException catch (error) {
       if (error.response?.statusCode == 401) {
         if (await refreshToken()) {
           return get(
@@ -177,9 +177,9 @@ class NetworkRestRepository implements NetworkRestInterface {
     }
 
     if (timeoutSeconds != null) {
-      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds).inSeconds;
-      dio.options.connectTimeout = Duration(seconds: timeoutSeconds).inSeconds;
-      dio.options.sendTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds);
+      dio.options.connectTimeout = Duration(seconds: timeoutSeconds);
+      dio.options.sendTimeout = Duration(seconds: timeoutSeconds);
     }
 
     if (baseUrl != null) {
@@ -193,7 +193,7 @@ class NetworkRestRepository implements NetworkRestInterface {
         queryParameters: queryParameters,
       );
       return response;
-    } on DioError catch (error) {
+    } on DioException catch (error) {
       if (error.response?.statusCode == 401) {
         if (await refreshToken()) {
           return post(
@@ -234,9 +234,9 @@ class NetworkRestRepository implements NetworkRestInterface {
     }
 
     if (timeoutSeconds != null) {
-      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds).inSeconds;
-      dio.options.connectTimeout = Duration(seconds: timeoutSeconds).inSeconds;
-      dio.options.sendTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds);
+      dio.options.connectTimeout = Duration(seconds: timeoutSeconds);
+      dio.options.sendTimeout = Duration(seconds: timeoutSeconds);
     }
 
     if (baseUrl != null) {
@@ -250,7 +250,7 @@ class NetworkRestRepository implements NetworkRestInterface {
         queryParameters: queryParameters,
       );
       return response;
-    } on DioError catch (error) {
+    } on DioException catch (error) {
       if (error.response?.statusCode == 401) {
         if (await refreshToken()) {
           return put(
@@ -291,9 +291,9 @@ class NetworkRestRepository implements NetworkRestInterface {
     }
 
     if (timeoutSeconds != null) {
-      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds).inSeconds;
-      dio.options.connectTimeout = Duration(seconds: timeoutSeconds).inSeconds;
-      dio.options.sendTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds);
+      dio.options.connectTimeout = Duration(seconds: timeoutSeconds);
+      dio.options.sendTimeout = Duration(seconds: timeoutSeconds);
     }
 
     if (baseUrl != null) {
@@ -307,7 +307,7 @@ class NetworkRestRepository implements NetworkRestInterface {
         queryParameters: queryParameters,
       );
       return response;
-    } on DioError catch (error) {
+    } on DioException catch (error) {
       if (error.response?.statusCode == 401) {
         if (await refreshToken()) {
           return delete(
@@ -343,9 +343,9 @@ class NetworkRestRepository implements NetworkRestInterface {
     dio.options.headers.addAll(headers);
 
     if (timeoutSeconds != null) {
-      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds).inSeconds;
-      dio.options.connectTimeout = Duration(seconds: timeoutSeconds).inSeconds;
-      dio.options.sendTimeout = Duration(seconds: timeoutSeconds).inSeconds;
+      dio.options.receiveTimeout = Duration(seconds: timeoutSeconds);
+      dio.options.connectTimeout = Duration(seconds: timeoutSeconds);
+      dio.options.sendTimeout = Duration(seconds: timeoutSeconds);
     }
 
     if (baseUrl != null) {
@@ -357,8 +357,8 @@ class NetworkRestRepository implements NetworkRestInterface {
 
       for (var entry in formData.entries) {
         final filename = entry.value.path.split('/').last;
-        final file = MultipartFile(
-          entry.value.openRead(),
+        final file = MultipartFile.fromStream(
+          entry.value.openRead,
           await entry.value.length(),
           filename: filename,
         );
@@ -372,7 +372,7 @@ class NetworkRestRepository implements NetworkRestInterface {
       );
 
       return response;
-    } on DioError catch (error) {
+    } on DioException catch (error) {
       if (error.response?.statusCode == 401) {
         if (await refreshToken()) {
           return uploadFile(
@@ -394,7 +394,7 @@ class NetworkRestRepository implements NetworkRestInterface {
     }
   }
 
-  ExceptionModel _buildException(DioError error) {
+  ExceptionModel _buildException(DioException error) {
     if (error.response == null) {
       return BaseNetworkException(
         code: -1,
